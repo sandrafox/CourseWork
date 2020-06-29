@@ -1,5 +1,5 @@
 package geneticalgorithms;
 
 public enum DominanceType {
-    AND, OR, DELTA
+    AND, OR, DELTA, XOR
 }

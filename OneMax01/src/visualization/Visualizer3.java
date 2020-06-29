@@ -23,9 +23,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.function.Supplier;
 
-public class Visualizer2 extends ApplicationFrame {
+public class Visualizer3 extends ApplicationFrame {
     private JFreeChart xylineChart;
-    public Visualizer2(String title, String chartTitle) throws GAException {
+    public Visualizer3(String title, String chartTitle) throws GAException {
         super(title);
         xylineChart = ChartFactory.createXYLineChart(
                 title,
@@ -83,17 +83,17 @@ public class Visualizer2 extends ApplicationFrame {
             //final int n = 1 << N;
             final int n1 = (int) Math.ceil(Math.pow(2, N - 0.7)), n2 = (int) Math.ceil(Math.pow(2, N - 0.3)), n = 1 << N;
             addGenerationsToDataSet(() -> new GADiploidWithTable(1, n, -1, 0.5, TypeSelectionParents.SUS,
-                            TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n, 0.9), 1.0 / n),
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n, 0.1), 1.0 / n),
                     ean, nRuns, 2 * n);
             //addInfoToDataSet(ga, ean, 2 * N);
             addGenerationsToDataSet(() -> new GADiploidWithTable(1, n, -1, 0.5, TypeSelectionParents.SUS,
-                            TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n, 0.9), 0.5 / n),
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n, 0.1), 0.5 / n),
                     ea2n, nRuns, 2 * n);
             addGenerationsToDataSet(() -> new GADiploidWithTable(2, n, -1, 0.5, TypeSelectionParents.SUS,
-                            TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n, 0.9), 1.0 / n),
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n, 0.1), 1.0 / n),
                     gan, nRuns, 2 * n);
             addGenerationsToDataSet(() -> new GADiploidWithTable(2, n, -1, 0.5, TypeSelectionParents.SUS,
-                            TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n, 0.9), 0.5 / n),
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n, 0.1), 0.5 / n),
                     ga2n, nRuns, 2 * n);
             //addInfoToDataSet(ga, ea2n, 2 * N);*/
             /*addGenerationsToDataSet(() -> new GADiploidWithTable(1, n, -1, 0.5, TypeSelectionParents.SUS,
@@ -131,30 +131,30 @@ public class Visualizer2 extends ApplicationFrame {
                     gan, nRuns, n);*/
             if (n1 != n) {
                 addGenerationsToDataSet(() -> new GADiploidWithTable(1, n1, -1, 0.5, TypeSelectionParents.SUS,
-                                TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n1, 0.9), 1.0 / n1),
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n1, 0.1), 1.0 / n1),
                         ean, nRuns, 2 * n1);
                 addGenerationsToDataSet(() -> new GADiploidWithTable(1, n1, -1, 0.5, TypeSelectionParents.SUS,
-                                TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n1, 0.9), 0.5 / n1),
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n1, 0.1), 0.5 / n1),
                         ea2n, nRuns, 2 * n1);
                 addGenerationsToDataSet(() -> new GADiploidWithTable(2, n1, -1, 0.5, TypeSelectionParents.SUS,
-                                TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n1, 0.9), 1.0 / n1),
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n1, 0.1), 1.0 / n1),
                         gan, nRuns, 2 * n1);
                 addGenerationsToDataSet(() -> new GADiploidWithTable(2, n1, -1, 0.5, TypeSelectionParents.SUS,
-                                TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n1, 0.9), 0.5 / n1),
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n1, 0.1), 0.5 / n1),
                         ga2n, nRuns, 2 * n1);
             }
             if (n2 != n) {
                 addGenerationsToDataSet(() -> new GADiploidWithTable(1, n2, -1, 0.5, TypeSelectionParents.SUS,
-                                TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n2, 0.9), 1.0 / n2),
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n2, 0.1), 1.0 / n2),
                         ean, nRuns, 2 * n2);
                 addGenerationsToDataSet(() -> new GADiploidWithTable(1, n2, -1, 0.5, TypeSelectionParents.SUS,
-                                TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n2, 0.9), 0.5 / n2),
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n2, 0.1), 0.5 / n2),
                         ea2n, nRuns, 2 * n2);
                 addGenerationsToDataSet(() -> new GADiploidWithTable(2, n2, -1, 0.5, TypeSelectionParents.SUS,
-                                TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n2, 0.9), 1.0 / n2),
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n2, 0.1), 1.0 / n2),
                         gan, nRuns, 2 * n2);
                 addGenerationsToDataSet(() -> new GADiploidWithTable(2, n2, -1, 0.5, TypeSelectionParents.SUS,
-                                TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n2, 0.9), 0.5 / n2),
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n2, 0.1), 0.5 / n2),
                         ga2n, nRuns, 2 * n2);
             }
             /*addGenerationsToDataSet(() -> new GAMonoid(1, n, -1, 0.5, TypeSelectionParents.SUS,
@@ -224,12 +224,12 @@ public class Visualizer2 extends ApplicationFrame {
     public void savePlot() throws IOException {
         int width = 1000;   /* Width of the image */
         int height = 800;  /* Height of the image */
-        File XYChart = new File( "VectorWith0.9HeNew.jpeg" );
+        File XYChart = new File( "VectorWith0.1HeNew.jpeg" );
         ChartUtilities.saveChartAsJPEG( XYChart, xylineChart, width, height);
     }
 
     public static void main(String[] args) throws GAException, IOException {
-        Visualizer2 chart = new Visualizer2("Прогресс генетических алгоритмов","Diploid genetic algorithm");
+        Visualizer3 chart = new Visualizer3("Прогресс генетических алгоритмов","Diploid genetic algorithm");
         chart.savePlot();
     }
 }

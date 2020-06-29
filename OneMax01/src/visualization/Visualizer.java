@@ -5,9 +5,12 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.LogAxis;
+import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.util.LogFormat;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -18,139 +21,160 @@ import survivalselectors.TypeSelectionSurvival;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.function.Supplier;
 
 public class Visualizer extends ApplicationFrame {
-
-    public Visualizer( String applicationTitle, String chartTitle ) throws GAException {
-        super(applicationTitle);
-        JFreeChart xylineChart = ChartFactory.createXYLineChart(
-                chartTitle ,
-                "Steps" ,
-                "Fitness" ,
+    private JFreeChart xylineChart;
+    public Visualizer(String title, String chartTitle) throws GAException {
+        super(title);
+        xylineChart = ChartFactory.createXYLineChart(
+                title,
+                "Длина особи",
+                "Количество поколений",
                 createDataset() ,
                 PlotOrientation.VERTICAL ,
                 true , true , false);
 
         ChartPanel chartPanel = new ChartPanel( xylineChart );
-        chartPanel.setPreferredSize( new java.awt.Dimension( 560 , 367 ) );
+        chartPanel.setPreferredSize( new java.awt.Dimension( 1000 , 800 ) );
         final XYPlot plot = xylineChart.getXYPlot( );
+        LogAxis yAxis = new LogAxis("Количество вычислений функции (10^)");
+        yAxis.setBase(10);
+        LogFormat format = new LogFormat(yAxis.getBase(), "", "", true);
+        yAxis.setNumberFormatOverride(format);
+        yAxis.setLabelFont(new Font("Helvetica", Font.BOLD, 16));
+        yAxis.setTickLabelFont(new Font("Helvetica", Font.BOLD, 16));
+        plot.setRangeAxis(yAxis);
+        LogAxis xAxis = new LogAxis("Значение фитнесс функции (2^)");
+        xAxis.setBase(2);
+        LogFormat format2 = new LogFormat(xAxis.getBase(), "", "", true);
+        xAxis.setNumberFormatOverride(format2);
+        xAxis.setLabelFont(new Font("Helvetica", Font.BOLD, 16));
+        xAxis.setTickLabelFont(new Font("Helvetica", Font.BOLD, 16));
+        plot.setDomainAxis(xAxis);
 
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer( );
         renderer.setSeriesPaint( 0 , Color.RED );
-        renderer.setSeriesPaint( 1 , Color.GREEN );
-        renderer.setSeriesPaint( 2 , Color.YELLOW );
-        renderer.setSeriesPaint(3, Color.BLUE);
-        renderer.setSeriesStroke( 0 , new BasicStroke( 4.0f ) );
-        renderer.setSeriesStroke( 1 , new BasicStroke( 3.0f ) );
+        renderer.setSeriesPaint( 1 , Color.BLUE );
+        renderer.setSeriesPaint( 2 , Color.MAGENTA );
+        renderer.setSeriesPaint(3, Color.GREEN);
+        renderer.setSeriesStroke( 0 , new BasicStroke( 2.0f ) );
+        renderer.setSeriesStroke( 1 , new BasicStroke( 2.0f ) );
         renderer.setSeriesStroke( 2 , new BasicStroke( 2.0f ) );
-        renderer.setSeriesStroke(5, new BasicStroke(1.0f));
+        renderer.setSeriesStroke(3, new BasicStroke(2.0f));
+        //renderer.setSeriesLinesVisible(0, false);
+        //renderer.setSeriesLinesVisible(1, false);
+        //renderer.setBaseLegendShape(new Rectangle2D(-40.0D, ));
+        renderer.setBaseLegendTextFont(new Font("Helvetica", Font.BOLD, 16));
         plot.setRenderer( renderer );
         setContentPane( chartPanel );
     }
 
-    public static XYDataset createDataset( ) throws GAException {
-        /* monoid
-        GAMonoid ga;
-        int generations;
-        final XYSeries mutation = new XYSeries( "RLS" );
-        for (int i = 0; i < 5; i++) {
-            ga = new GAMonoid(50, 50, -1, 0, 2, 1);
-            ga.evalPopulation();
-            generations = 1;
-            while (!ga.isTerminated(50)) {
-                //System.out.println(ga.getMaximalFitness());
-                mutation.add(generations, ga.getMaximalFitness());
-                ga.randomLocalSearch();
-                generations++;
-            }
-            //System.out.println(generations);
-            mutation.add(generations, 50);
-        }
-
-        final XYSeries mcrossover = new XYSeries( "greedy(m + 1)" );
-        for (int i = 0; i < 5; i++) {
-            ga = new GAMonoid(50, 50, -1, 0.5, 2, 1);
-            ga.evalPopulation();
-            generations = 1;
-            while (!ga.isTerminated(50)) {
-                //System.out.println(ga.getMaximalFitness());
-                mcrossover.add(generations, ga.getMaximalFitness());
-                ga.greedyMGA();
-                generations++;
-            }
-            System.out.println(generations);
-            mcrossover.add(generations, 50);
-        }
-
-        final XYSeriesCollection dataset = new XYSeriesCollection( );
-        dataset.addSeries( mutation );
-        dataset.addSeries(mcrossover);
-        return dataset;
-
-         */
+    public XYDataset createDataset( ) throws GAException {
         GeneticAlgorithm ga;
-        int generations;
-        /*final XYSeries and = new XYSeries( "andSBM" );
-        for (int i = 0; i < 5; i++) {
-            ga = new geneticalgorithmdiploid.GAMonoid(50, 50, -1, 0, 2, 1, geneticalgorithms.DominanceType.AND);
-            ga.evalPopulation();
-            generations = 1;
-            while (!ga.isTerminated(50)) {
-                //System.out.println(ga.getMaximalFitness());
-                and.add(generations, ga.getMaximalFitness());
-                ga.randomLocalSearch();
-                generations++;
-            }
-            //System.out.println(generations);
-            and.add(generations, 50);
-        }
-         */
-        final XYSeries ean = new XYSeries( "(1 + 1)1/N");
-        final XYSeries ea2n = new XYSeries( "(1 + 1)1/2N" );
-        final XYSeries gan = new XYSeries("(2 + 1)1/N");
-        final XYSeries ga2n = new XYSeries("(2 + 1)1/2N");
+        final XYSeries ean = new XYSeries( "(1+1) 1/N");
+        final XYSeries ea2n = new XYSeries( "(1+1) 1/2N" );
+        final XYSeries gan = new XYSeries("(2+1) 1/N");
+        final XYSeries ga2n = new XYSeries("(2+1) 1/2N");
 
-        for (int N = 5; N <= 45; N += 5) {
-            for (int i = 0; i < 5; i++) {
-                ga = new GADiploidWithTable(1, N, -1, 0.5, TypeSelectionParents.SUS,
-                        TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(N, 0.1), 1 / (double)N);
-                addGenerationsToDataSet(ga, ean, 2 * N);
-                //addInfoToDataSet(ga, ean, 2 * N);
-                ga = new GADiploidWithTable(1, N, -1, 0.5, TypeSelectionParents.SUS,
-                        TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(N, 0.1), 1 / (double)(2 * N));
-                //addGenerationsToDataSet(ga, ea2n, 2 * N);
-                //addInfoToDataSet(ga, ea2n, 2 * N);
-                ga = new GADiploidWithTable(2, N, -1, 0.5, TypeSelectionParents.SUS,
-                        TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(N, 0.1),
-                        1 / (double)N);
-                addGenerationsToDataSet(ga, gan, 2 * N);
-                ga = new GADiploidWithTable(2, N, -1, 0.5, TypeSelectionParents.SUS,
-                        TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(N, 0.1),
-                        1 / (double) (2 * N));
-                //addGenerationsToDataSet(ga, ga2n, 2 * N);
-                //addInfoToDataSet(ga, gan, 2 * N);
-                ga = new GADiploidWithTable(2, N, -1, 0.5, TypeSelectionParents.SUS,
-                        TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDYMOD, generateVector(N, 0.1),
-                        1 / (double)(N));
-                //addGenerationsToDataSet(ga, ean, 2 * N);
-                ga = new GADiploidWithTable(2, N, -1, 0.5, TypeSelectionParents.SUS,
-                        TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDYMOD, generateVector(N, 0.1),
-                        1 / (double)(2 * N));
-                //addGenerationsToDataSet(ga, ea2n, 2 * N);
-
+        System.out.println("[{}");
+        final int nRuns = 100;
+        for (int N = 8; N <= 11; ++N) {
+            //final int n = 1 << N;
+            final int n1 = (int) Math.ceil(Math.pow(2, N - 0.7)), n2 = (int) Math.ceil(Math.pow(2, N - 0.3)), n = 1 << N;
+            addGenerationsToDataSet(() -> new GADiploidWithTable(1, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n, 0.5), 1.0 / n),
+                    ean, nRuns, 2 * n);
+            //addInfoToDataSet(ga, ean, 2 * N);
+            addGenerationsToDataSet(() -> new GADiploidWithTable(1, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n, 0.5), 0.5 / n),
+                    ea2n, nRuns, 2 * n);
+            addGenerationsToDataSet(() -> new GADiploidWithTable(2, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n, 0.5), 1.0 / n),
+                    gan, nRuns, 2 * n);
+            addGenerationsToDataSet(() -> new GADiploidWithTable(2, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n, 0.5), 0.5 / n),
+                    ga2n, nRuns, 2 * n);
+            //addInfoToDataSet(ga, ea2n, 2 * N);*/
+            /*addGenerationsToDataSet(() -> new GADiploidWithTable(1, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.SBMMOD, generateVector(n, 0.9), 1.0 / n),
+                    gan, nRuns, 2 * n);
+            addGenerationsToDataSet(() -> new GADiploidWithTable(1, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.SBMMOD, generateVector(n, 0.9), 0.5 / n),
+                    ga2n, nRuns, 2 * n);
+            //addInfoToDataSet(ga, gan, 2 * N);*/
+//            ga = new GADiploidWithTable(2, N, -1, 0.5, TypeSelectionParents.SUS,
+//                    TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDYMOD, generateVector(N, 0.1),
+//                    1 / (double)(N));
+            //addGenerationsToDataSet(ga, ean, 2 * N);
+//            ga = new GADiploidWithTable(2, N, -1, 0.5, TypeSelectionParents.SUS,
+//                    TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDYMOD, generateVector(N, 0.1),
+//                    1 / (double)(2 * N));
+            //addGenerationsToDataSet(ga, ea2n, 2 * N);*/
+            /*addGenerationsToDataSet(() -> new GADiploidCycleWithAverage(1, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.SBM),
+                    ean, nRuns, n);
+            addGenerationsToDataSet(() -> new GADiploidCycleWithAverage(2, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY),
+                    gan, nRuns, n);
+            addGenerationsToDataSet(() -> new GAMonoid(1, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.SBM),
+                    ea2n, nRuns, n);
+            addGenerationsToDataSet(() -> new GAMonoid(1, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.RLS),
+                    ga2n, nRuns, n);
+            /*addGenerationsToDataSet(() -> new GADiploidWithDominance(1, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, DominanceType.XOR, AlgorithmType.SBM),
+                    ean, nRuns, n);*/
+            /*addGenerationsToDataSet(() -> new GADiploidWithDominance(2, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, DominanceType.XOR, AlgorithmType.GREEDY),
+                    gan, nRuns, n);*/
+            if (n1 != n) {
+                addGenerationsToDataSet(() -> new GADiploidWithTable(1, n1, -1, 0.5, TypeSelectionParents.SUS,
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n1, 0.5), 1.0 / n1),
+                        ean, nRuns, 2 * n1);
+                addGenerationsToDataSet(() -> new GADiploidWithTable(1, n1, -1, 0.5, TypeSelectionParents.SUS,
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n1, 0.5), 0.5 / n1),
+                        ea2n, nRuns, 2 * n1);
+                addGenerationsToDataSet(() -> new GADiploidWithTable(2, n1, -1, 0.5, TypeSelectionParents.SUS,
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n1, 0.5), 1.0 / n1),
+                        gan, nRuns, 2 * n1);
+                addGenerationsToDataSet(() -> new GADiploidWithTable(2, n1, -1, 0.5, TypeSelectionParents.SUS,
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n1, 0.5), 0.5 / n1),
+                        ga2n, nRuns, 2 * n1);
             }
+            if (n2 != n) {
+                addGenerationsToDataSet(() -> new GADiploidWithTable(1, n2, -1, 0.5, TypeSelectionParents.SUS,
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n2, 0.5), 1.0 / n2),
+                        ean, nRuns, 2 * n2);
+                addGenerationsToDataSet(() -> new GADiploidWithTable(1, n2, -1, 0.5, TypeSelectionParents.SUS,
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.SBM, generateVector(n2, 0.5), 0.5 / n2),
+                        ea2n, nRuns, 2 * n2);
+                addGenerationsToDataSet(() -> new GADiploidWithTable(2, n2, -1, 0.5, TypeSelectionParents.SUS,
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n2, 0.5), 1.0 / n2),
+                        gan, nRuns, 2 * n2);
+                addGenerationsToDataSet(() -> new GADiploidWithTable(2, n2, -1, 0.5, TypeSelectionParents.SUS,
+                                TypeSelectionSurvival.FITNESS, AlgorithmType.GREEDY, generateVector(n2, 0.5), 0.5 / n2),
+                        ga2n, nRuns, 2 * n2);
+            }
+            /*addGenerationsToDataSet(() -> new GAMonoid(1, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.SBM),
+                    ea2n, nRuns, n);*/
+            /*addGenerationsToDataSet(() -> new GAMonoid(1, n, -1, 0.5, TypeSelectionParents.SUS,
+                            TypeSelectionSurvival.FITNESS, AlgorithmType.RLS),
+                    ga2n, nRuns, n);*/
         }
+        System.out.println("]");
 
         final XYSeriesCollection dataset = new XYSeriesCollection( );
         dataset.addSeries(ean);
         dataset.addSeries(ea2n);
         dataset.addSeries(gan);
         dataset.addSeries(ga2n);
-        //dataset.addSeries(and);
         return dataset;
     }
 
-    private static int[] generateVector(int length, double probabilityHe) {
+    private int[] generateVector(int length, double probabilityHe) {
         double probability0 = probabilityHe + (1 - probabilityHe) / 2;
         int[] vector = new int[length];
         for (int i = 0; i < length; ++i) {
@@ -166,7 +190,7 @@ public class Visualizer extends ApplicationFrame {
         return vector;
     }
 
-    private static void addInfoToDataSet(GeneticAlgorithm ga, XYSeries s, int maxValue) throws GAException {
+    private void addInfoToDataSet(GeneticAlgorithm ga, XYSeries s, int maxValue) throws GAException {
         ga.evalPopulation();
         int generations = 1;
         while (!ga.isTerminated(maxValue)) {
@@ -179,34 +203,33 @@ public class Visualizer extends ApplicationFrame {
         s.add(generations, ga.getMaximalFitness());
     }
 
-    private static void addGenerationsToDataSet(GeneticAlgorithm ga, XYSeries s, int maxValue) throws GAException {
-        ga.evalPopulation();
-        int generations = 1;
-        while ((!ga.isTerminated(maxValue))) {
-            //System.out.println(ga.getMaximalFitness());
-            ga.newGeneration();
-            generations++;
+    private static void addGenerationsToDataSet(Supplier<GeneticAlgorithm> gaSup, XYSeries s, int nRuns, int maxValue) throws GAException {
+        double sumGenerations = 0;
+        for (int i = 0; i < nRuns; ++i) {
+            GeneticAlgorithm ga = gaSup.get();
+            ga.evalPopulation();
+            int generations = 1;
+            while ((!ga.isTerminated(maxValue))) {
+                ga.newGeneration();
+                generations++;
+            }
+            if (ga instanceof GADiploidCycleWithAverage) generations *= 2;
+            System.out.println(",{\"algorithm\":\"" + s.getKey() + "\",\"fitness\":" + maxValue + ",\"runtime\":" + generations + "}");
+            sumGenerations += generations;
         }
-        System.out.println(generations);
-        s.add(generations, ga.getMaximalFitness());
+        s.add(maxValue, sumGenerations / nRuns);
+        System.out.println(",{\"algorithm\":\"" + s.getKey() + "\",\"fitness\":" + maxValue + ",\"runtime mean\":" + (sumGenerations / nRuns) + "}");
     }
 
-    public static void main( String[ ] args ) {
-        try {
-            JFreeChart xylineChart = ChartFactory.createXYLineChart(
-                    "Genetic Algorithms progress",
-                    "Generations",
-                    "Score",
-                    Visualizer.createDataset(),
-                    PlotOrientation.VERTICAL,
-                    true, true, false);
+    public void savePlot() throws IOException {
+        int width = 1000;   /* Width of the image */
+        int height = 800;  /* Height of the image */
+        File XYChart = new File( "VectorWith0.5HeNew2.jpeg" );
+        ChartUtilities.saveChartAsJPEG( XYChart, xylineChart, width, height);
+    }
 
-            int width = 1000;   /* Width of the image */
-            int height = 800;  /* Height of the image */
-            File XYChart = new File( "VectorWith0.1He2.jpeg" );
-            ChartUtilities.saveChartAsJPEG( XYChart, xylineChart, width, height);
-        } catch (GAException | IOException e) {
-            System.out.println(e.getMessage());
-        }
+    public static void main(String[] args) throws GAException, IOException {
+        Visualizer chart = new Visualizer("Прогресс генетических алгоритмов","Diploid genetic algorithm");
+        chart.savePlot();
     }
 }
