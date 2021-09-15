@@ -1,3 +1,4 @@
 OneMax/*.jpeg
-OneMax/out
-OneMax/lib
+OneMax/out/
+OneMax/lib/
+OneMax/.out
