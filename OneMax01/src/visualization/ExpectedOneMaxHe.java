@@ -20,44 +20,44 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class ExpectedOneMax extends ApplicationFrame {
+public class ExpectedOneMaxHe extends ApplicationFrame {
     private JFreeChart xylineChart;
     private static FileWriter myWriter;
 
-    public ExpectedOneMax(String title) throws IOException {
+    public ExpectedOneMaxHe(String title) throws IOException {
         super(title);
 
-        myWriter = new FileWriter("expected time for OneMax Linear With 20.out");
+        myWriter = new FileWriter("expected time for OneMaxHe Linear Quadratic.out");
 
         xylineChart = ChartFactory.createXYLineChart(
                 title,
                 "Длина особи",
                 "Ожидаемое количество вычислений",
-                createDatasetForConstLength() ,
+                createDataset() ,
                 PlotOrientation.VERTICAL ,
                 true , true , false);
 
         ChartPanel chartPanel = new ChartPanel( xylineChart );
         chartPanel.setPreferredSize( new java.awt.Dimension( 1000 , 800 ) );
         final XYPlot plot = xylineChart.getXYPlot( );
-        /*LogAxis yAxis = new LogAxis("Количество вычислений функции / 2^20");
+        LogAxis yAxis = new LogAxis("Количество вычислений функции / длина^2");
         yAxis.setBase(10);
         LogFormat format = new LogFormat(yAxis.getBase(), "", "", true);
         yAxis.setNumberFormatOverride(format);
         yAxis.setLabelFont(new Font("Helvetica", Font.BOLD, 16));
         yAxis.setTickLabelFont(new Font("Helvetica", Font.BOLD, 16));
-        plot.setRangeAxis(yAxis);*/
-        NumberAxis yAxis = new NumberAxis("Количество вычислений функции / 2^20");
+        plot.setRangeAxis(yAxis);
+        /*NumberAxis yAxis = new NumberAxis("Количество вычислений функции / 2^20");
         yAxis.setLabelFont(new Font("Helvetica", Font.BOLD, 16));
         yAxis.setTickLabelFont(new Font("Helvetica", Font.BOLD, 16));
-        plot.setRangeAxis(yAxis);
-        /*LogAxis xAxis = new LogAxis("Значение фитнесс функции (2^)");
+        plot.setRangeAxis(yAxis);*/
+        LogAxis xAxis = new LogAxis("Значение фитнесс функции (2^)");
         xAxis.setBase(2);
         LogFormat format2 = new LogFormat(xAxis.getBase(), "", "", true);
         xAxis.setNumberFormatOverride(format2);
         xAxis.setLabelFont(new Font("Helvetica", Font.BOLD, 16));
         xAxis.setTickLabelFont(new Font("Helvetica", Font.BOLD, 16));
-        plot.setDomainAxis(xAxis);*/
+        plot.setDomainAxis(xAxis);
 
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer( );
         renderer.setSeriesPaint( 0 , Color.RED );
@@ -86,9 +86,9 @@ public class ExpectedOneMax extends ApplicationFrame {
 
     private double calcP(int i, int n, double mu) {
         double s = mu * Math.pow((1. - mu), (2. * n - 1.)) * (2. * n - i), cur  = mu * Math.pow((1. - mu), (2. * n - 1.)) * (2. * n - i);
-        for (int t = 1; t <= Math.min(i, 2*n - i - 1); t++) {
+        for (int t = 1; t <= (2* n - i - 1); t++) {
             int j = t - 1;
-            cur *= mu * mu * (2. * n - i -j - 1) * (i - j) / ((1. -mu) * (1. - mu) * (j + 2.) * (j + 1.));
+            cur *= mu * mu * (2. * n - i -j - 1) * (i - n +j +1) / ((1. -mu) * (1. - mu) * (j + 2.) * (j + 1.));
             s += cur;
         }
         return s;
@@ -103,7 +103,7 @@ public class ExpectedOneMax extends ApplicationFrame {
         for (int N = 5; N <= 20; ++N) {
             double sn = 0., s2n = 0., s05n = 0.;
             final int n1 = (int) Math.ceil(Math.pow(2, N - 0.7)), n2 = (int) Math.ceil(Math.pow(2, N - 0.3)), n = 1 << N;
-            for (int i = 1; i < n1; i++) {
+            for (int i = n1 / 2; i < n1; i++) {
                 sn += 1. / calcP(i, n1, 1. / n1);
                 s2n += 1. / calcP(i, n1, 1. / (2 * n1));
                 s05n += 1. / calcP(i, n1, 2. / n1);
@@ -127,7 +127,7 @@ public class ExpectedOneMax extends ApplicationFrame {
             sn = 0.;
             s2n = 0.;
             s05n = 0.;
-            for (int i = 1; i <= n; i++) {
+            for (int i = n / 2; i <= n; i++) {
                 sn += 1. / calcP(i, n, 1. / n);
                 s2n += 1. / calcP(i, n, 1. / (2 * n));
                 s05n += 1. / calcP(i, n, 2. / n);
@@ -151,7 +151,7 @@ public class ExpectedOneMax extends ApplicationFrame {
             sn = 0.;
             s2n = 0.;
             s05n = 0.;
-            for (int i = 1; i <= n2; i++) {
+            for (int i = n2 / 2; i <= n2; i++) {
                 sn += 1. / calcP(i, n2, 1. / n2);
                 s2n += 1. / calcP(i, n2, 1. / (2 * n2));
                 s05n += 1. / calcP(i, n2, 2. / n2);
@@ -185,13 +185,14 @@ public class ExpectedOneMax extends ApplicationFrame {
 
     public XYDataset createDatasetForConstLength() throws IOException {
         final XYSeries tn = new XYSeries("2^20");
-        double c = 0.05;
+        double c = 0.4;
         double d = 0.001;
         int n = 1 << 15;
+        int start = 1 << 14;
         myWriter.write("[{" + n + "}\n");
-        for (int j = 1; j <=1500; j++) {
+        for (int j = 1; j <=1000; j++) {
             double sn = 0.;
-            for (int i = 1; i <= n; i++) {
+            for (int i = start; i <= n; i++) {
                 sn += 1. / calcP(i, n, 1. / (c * n));
             }
             sn /= 2.;
@@ -212,13 +213,13 @@ public class ExpectedOneMax extends ApplicationFrame {
     public void savePlot() throws IOException {
         int width = 1000;   /* Width of the image */
         int height = 800;  /* Height of the image */
-        File XYChart = new File( "expectedTimeForOneMaxLinearWith20.jpeg" );
+        File XYChart = new File( "expectedTimeForOneMaxHeLinearQuadratic.jpeg" );
         ChartUtilities.saveChartAsJPEG( XYChart, xylineChart, width, height);
         myWriter.close();
     }
 
     public static void main(String[] args) throws IOException {
-        ExpectedOneMax chart = new ExpectedOneMax("Ожидаемое время работы для OneMax");
+        ExpectedOneMaxHe chart = new ExpectedOneMaxHe("Ожидаемое время работы для OneMax Hetero ");
         chart.savePlot();
     }
 }
