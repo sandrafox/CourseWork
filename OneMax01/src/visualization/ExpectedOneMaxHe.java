@@ -19,6 +19,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class ExpectedOneMaxHe extends ApplicationFrame {
     private JFreeChart xylineChart;
@@ -84,12 +86,12 @@ public class ExpectedOneMaxHe extends ApplicationFrame {
         return binom;
     }
 
-    private double calcP(int i, int n, double mu) {
-        double s = mu * Math.pow((1. - mu), (2. * n - 1.)) * (2. * n - i), cur  = mu * Math.pow((1. - mu), (2. * n - 1.)) * (2. * n - i);
+    private BigDecimal calcP(int i, int n, double mu) {
+        BigDecimal s = new BigDecimal(mu * Math.pow((1. - mu), (2. * n - 1.)) * (2. * n - i)), cur  = BigDecimal.valueOf(s.doubleValue());
         for (int t = 1; t <= (2* n - i - 1); t++) {
             int j = t - 1;
-            cur *= mu * mu * (2. * n - i -j - 1) * (i - n +j +1) / ((1. -mu) * (1. - mu) * (j + 2.) * (j + 1.));
-            s += cur;
+            cur = cur.multiply(new BigDecimal(mu * mu * (2. * n - i -j - 1) * (i - n +j +1) / ((1. -mu) * (1. - mu) * (j + 2.) * (j + 1.))));
+            s = s.add(cur);
         }
         return s;
     }
@@ -100,23 +102,17 @@ public class ExpectedOneMaxHe extends ApplicationFrame {
         final XYSeries t05n = new XYSeries("2/N");
 
         myWriter.write("[{}\n");
-        for (int N = 5; N <= 20; ++N) {
-            double sn = 0., s2n = 0., s05n = 0.;
+        for (int N = 5; N <= 12; ++N) {
+            BigDecimal sn = BigDecimal.ZERO, s2n = BigDecimal.ZERO, s05n = BigDecimal.ZERO;
             final int n1 = (int) Math.ceil(Math.pow(2, N - 0.7)), n2 = (int) Math.ceil(Math.pow(2, N - 0.3)), n = 1 << N;
             for (int i = n1 / 2; i < n1; i++) {
-                sn += 1. / calcP(i, n1, 1. / n1);
-                s2n += 1. / calcP(i, n1, 1. / (2 * n1));
-                s05n += 1. / calcP(i, n1, 2. / n1);
+                sn = sn.add(BigDecimal.ONE.divide(calcP(i, n1, 1. / n1), RoundingMode.HALF_UP));
+                s2n = s2n.add(BigDecimal.ONE.divide(calcP(i, n1, 1. / (2 * n1)), RoundingMode.HALF_UP));
+                s05n = s05n.add(BigDecimal.ONE.divide(calcP(i, n1, 2. / n1), RoundingMode.HALF_UP));
             }
-            sn /= 2.;
-            s2n /= 2.;
-            s05n /= 2.;
-            sn /= n1;
-            s2n /= n1;
-            s05n /= n1;
-            sn /= n1;
-            s2n /= n1;
-            s05n /= n1;
+            sn = sn.divide(new BigDecimal(2 * n1 * n1), RoundingMode.HALF_UP);
+            s2n = s2n.divide(new BigDecimal(2 * n1 * n1), RoundingMode.HALF_UP);
+            s05n = s05n.divide(new BigDecimal(2 * n1 * n1), RoundingMode.HALF_UP);
             myWriter.write(",{\"fitness\":" + n1 + ",\"runtime\":" + sn + "}\n");
             myWriter.write(",{\"fitness\":" + n1 + ",\"runtime\":" + s2n + "}\n");
             myWriter.write(",{\"fitness\":" + n1 + ",\"runtime\":" + s05n + "}\n");
@@ -124,23 +120,17 @@ public class ExpectedOneMaxHe extends ApplicationFrame {
             t2n.add(n1, s2n);
             t05n.add(n1, s05n);
 
-            sn = 0.;
-            s2n = 0.;
-            s05n = 0.;
+            sn = BigDecimal.ZERO;
+            s2n = BigDecimal.ZERO;
+            s05n = BigDecimal.ZERO;
             for (int i = n / 2; i <= n; i++) {
-                sn += 1. / calcP(i, n, 1. / n);
-                s2n += 1. / calcP(i, n, 1. / (2 * n));
-                s05n += 1. / calcP(i, n, 2. / n);
+                sn = sn.add(BigDecimal.ONE.divide(calcP(i, n, 1. / n), RoundingMode.HALF_UP));
+                s2n = s2n.add(BigDecimal.ONE.divide(calcP(i, n, 1. / (2 * n)), RoundingMode.HALF_UP));
+                s05n = s05n.add(BigDecimal.ONE.divide(calcP(i, n, 2. / n), RoundingMode.HALF_UP));
             }
-            sn /= 2.;
-            s2n /= 2.;
-            s05n /= 2.;
-            sn /= n;
-            s2n /= n;
-            s05n /= n;
-            sn /= n;
-            s2n /= n;
-            s05n /= n;
+            sn = sn.divide(new BigDecimal(2 * n * n), RoundingMode.HALF_UP);
+            s2n = s2n.divide(new BigDecimal(2 * n * n), RoundingMode.HALF_UP);
+            s05n = s05n.divide(new BigDecimal(2 * n * n), RoundingMode.HALF_UP);
             myWriter.write(",{\"fitness\":" + n + ",\"runtime\":" + sn + "}\n");
             myWriter.write(",{\"fitness\":" + n + ",\"runtime\":" + s2n + "}\n");
             myWriter.write(",{\"fitness\":" + n + ",\"runtime\":" + s05n + "}\n");
@@ -148,23 +138,17 @@ public class ExpectedOneMaxHe extends ApplicationFrame {
             t2n.add(n, s2n);
             t05n.add(n, s05n);
 
-            sn = 0.;
-            s2n = 0.;
-            s05n = 0.;
+            sn = BigDecimal.ZERO;
+            s2n = BigDecimal.ZERO;
+            s05n = BigDecimal.ZERO;
             for (int i = n2 / 2; i <= n2; i++) {
-                sn += 1. / calcP(i, n2, 1. / n2);
-                s2n += 1. / calcP(i, n2, 1. / (2 * n2));
-                s05n += 1. / calcP(i, n2, 2. / n2);
+                sn = sn.add(BigDecimal.ONE.divide(calcP(i, n2, 1. / n2), RoundingMode.HALF_UP));
+                s2n = s2n.add(BigDecimal.ONE.divide(calcP(i, n2, 1. / (2 * n2)), RoundingMode.HALF_UP));
+                s05n = s05n.add(BigDecimal.ONE.divide(calcP(i, n2, 2. / n2), RoundingMode.HALF_UP));
             }
-            sn /= 2.;
-            s2n /= 2.;
-            s05n /= 2.;
-            sn /= n2;
-            s2n /= n2;
-            s05n /= n2;
-            sn /= n2;
-            s2n /= n2;
-            s05n /= n2;
+            sn = sn.divide(new BigDecimal(2 * n2 * n2), RoundingMode.HALF_UP);
+            s2n = s2n.divide(new BigDecimal(2 * n2 * n2), RoundingMode.HALF_UP);
+            s05n = s05n.divide(new BigDecimal(2 * n2 * n2), RoundingMode.HALF_UP);
             myWriter.write(",{\"fitness\":" + n2 + ",\"runtime\":" + sn + "}\n");
             myWriter.write(",{\"fitness\":" + n2 + ",\"runtime\":" + s2n + "}\n");
             myWriter.write(",{\"fitness\":" + n2 + ",\"runtime\":" + s05n + "}\n");
@@ -193,7 +177,7 @@ public class ExpectedOneMaxHe extends ApplicationFrame {
         for (int j = 1; j <=1000; j++) {
             double sn = 0.;
             for (int i = start; i <= n; i++) {
-                sn += 1. / calcP(i, n, 1. / (c * n));
+                sn += 1. / calcP(i, n, 1. / (c * n)).doubleValue();
             }
             sn /= 2.;
             sn /= n;
