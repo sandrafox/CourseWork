@@ -86,11 +86,11 @@ public class ExpectedOneMaxHe extends ApplicationFrame {
         return binom;
     }
 
-    private BigDecimal calcP(int i, int n, double mu) {
-        BigDecimal s = new BigDecimal(mu * Math.pow((1. - mu), (2. * n - 1.)) * (2. * n - i)), cur  = BigDecimal.valueOf(s.doubleValue());
+    private BigDecimal calcP(int i, int n, BigDecimal mu) {
+        BigDecimal s = mu.multiply(BigDecimal.ONE.subtract(mu).pow(2 * n - 1)).multiply(new BigDecimal(2 * n - i)), cur  = BigDecimal.valueOf(s.doubleValue());
         for (int t = 1; t <= (2* n - i - 1); t++) {
             int j = t - 1;
-            cur = cur.multiply(new BigDecimal(mu * mu * (2. * n - i -j - 1) * (i - n +j +1) / ((1. -mu) * (1. - mu) * (j + 2.) * (j + 1.))));
+            cur = cur.multiply(mu).multiply(mu).multiply(new BigDecimal(2 * n - i -j - 1)).multiply(new BigDecimal(i - n +j +1)).divide(BigDecimal.ONE.subtract(mu).pow(2).multiply(new BigDecimal(j + 2)).multiply(new BigDecimal(j + 1)), RoundingMode.HALF_UP);
             s = s.add(cur);
         }
         return s;
@@ -106,13 +106,13 @@ public class ExpectedOneMaxHe extends ApplicationFrame {
             BigDecimal sn = BigDecimal.ZERO, s2n = BigDecimal.ZERO, s05n = BigDecimal.ZERO;
             final int n1 = (int) Math.ceil(Math.pow(2, N - 0.7)), n2 = (int) Math.ceil(Math.pow(2, N - 0.3)), n = 1 << N;
             for (int i = n1 / 2; i < n1; i++) {
-                sn = sn.add(BigDecimal.ONE.divide(calcP(i, n1, 1. / n1), RoundingMode.HALF_UP));
-                s2n = s2n.add(BigDecimal.ONE.divide(calcP(i, n1, 1. / (2 * n1)), RoundingMode.HALF_UP));
-                s05n = s05n.add(BigDecimal.ONE.divide(calcP(i, n1, 2. / n1), RoundingMode.HALF_UP));
+                sn = sn.add(BigDecimal.ONE.divide(calcP(i, n1, BigDecimal.ONE.divide(BigDecimal.valueOf(n1), RoundingMode.HALF_UP)), RoundingMode.HALF_UP));
+                s2n = s2n.add(BigDecimal.ONE.divide(calcP(i, n1, BigDecimal.ONE.divide(BigDecimal.valueOf(2L * n1), RoundingMode.HALF_UP)), RoundingMode.HALF_UP));
+                s05n = s05n.add(BigDecimal.ONE.divide(calcP(i, n1, BigDecimal.valueOf(2).divide(BigDecimal.valueOf(n1), RoundingMode.HALF_UP)), RoundingMode.HALF_UP));
             }
-            sn = sn.divide(new BigDecimal(2 * n1 * n1), RoundingMode.HALF_UP);
-            s2n = s2n.divide(new BigDecimal(2 * n1 * n1), RoundingMode.HALF_UP);
-            s05n = s05n.divide(new BigDecimal(2 * n1 * n1), RoundingMode.HALF_UP);
+            sn = sn.divide(BigDecimal.valueOf(2L * n1 * n1), RoundingMode.HALF_UP);
+            s2n = s2n.divide(BigDecimal.valueOf(2L * n1 * n1), RoundingMode.HALF_UP);
+            s05n = s05n.divide(BigDecimal.valueOf(2L * n1 * n1), RoundingMode.HALF_UP);
             myWriter.write(",{\"fitness\":" + n1 + ",\"runtime\":" + sn + "}\n");
             myWriter.write(",{\"fitness\":" + n1 + ",\"runtime\":" + s2n + "}\n");
             myWriter.write(",{\"fitness\":" + n1 + ",\"runtime\":" + s05n + "}\n");
@@ -124,13 +124,13 @@ public class ExpectedOneMaxHe extends ApplicationFrame {
             s2n = BigDecimal.ZERO;
             s05n = BigDecimal.ZERO;
             for (int i = n / 2; i <= n; i++) {
-                sn = sn.add(BigDecimal.ONE.divide(calcP(i, n, 1. / n), RoundingMode.HALF_UP));
-                s2n = s2n.add(BigDecimal.ONE.divide(calcP(i, n, 1. / (2 * n)), RoundingMode.HALF_UP));
-                s05n = s05n.add(BigDecimal.ONE.divide(calcP(i, n, 2. / n), RoundingMode.HALF_UP));
+                sn = sn.add(BigDecimal.ONE.divide(calcP(i, n, BigDecimal.ONE.divide(BigDecimal.valueOf(n), RoundingMode.HALF_UP)), RoundingMode.HALF_UP));
+                s2n = s2n.add(BigDecimal.ONE.divide(calcP(i, n, BigDecimal.ONE.divide(BigDecimal.valueOf(2L * n), RoundingMode.HALF_UP)), RoundingMode.HALF_UP));
+                s05n = s05n.add(BigDecimal.ONE.divide(calcP(i, n, BigDecimal.valueOf(2).divide(BigDecimal.valueOf(n), RoundingMode.HALF_UP)), RoundingMode.HALF_UP));
             }
-            sn = sn.divide(new BigDecimal(2 * n * n), RoundingMode.HALF_UP);
-            s2n = s2n.divide(new BigDecimal(2 * n * n), RoundingMode.HALF_UP);
-            s05n = s05n.divide(new BigDecimal(2 * n * n), RoundingMode.HALF_UP);
+            sn = sn.divide(BigDecimal.valueOf(2L * n * n), RoundingMode.HALF_UP);
+            s2n = s2n.divide(BigDecimal.valueOf(2L * n * n), RoundingMode.HALF_UP);
+            s05n = s05n.divide(BigDecimal.valueOf(2L * n * n), RoundingMode.HALF_UP);
             myWriter.write(",{\"fitness\":" + n + ",\"runtime\":" + sn + "}\n");
             myWriter.write(",{\"fitness\":" + n + ",\"runtime\":" + s2n + "}\n");
             myWriter.write(",{\"fitness\":" + n + ",\"runtime\":" + s05n + "}\n");
@@ -142,13 +142,13 @@ public class ExpectedOneMaxHe extends ApplicationFrame {
             s2n = BigDecimal.ZERO;
             s05n = BigDecimal.ZERO;
             for (int i = n2 / 2; i <= n2; i++) {
-                sn = sn.add(BigDecimal.ONE.divide(calcP(i, n2, 1. / n2), RoundingMode.HALF_UP));
-                s2n = s2n.add(BigDecimal.ONE.divide(calcP(i, n2, 1. / (2 * n2)), RoundingMode.HALF_UP));
-                s05n = s05n.add(BigDecimal.ONE.divide(calcP(i, n2, 2. / n2), RoundingMode.HALF_UP));
+                sn = sn.add(BigDecimal.ONE.divide(calcP(i, n2, BigDecimal.ONE.divide(BigDecimal.valueOf(n2), RoundingMode.HALF_UP)), RoundingMode.HALF_UP));
+                s2n = s2n.add(BigDecimal.ONE.divide(calcP(i, n2, BigDecimal.ONE.divide(BigDecimal.valueOf(2L * n2), RoundingMode.HALF_UP)), RoundingMode.HALF_UP));
+                s05n = s05n.add(BigDecimal.ONE.divide(calcP(i, n2, BigDecimal.valueOf(2).divide(BigDecimal.valueOf(n2), RoundingMode.HALF_UP)), RoundingMode.HALF_UP));
             }
-            sn = sn.divide(new BigDecimal(2 * n2 * n2), RoundingMode.HALF_UP);
-            s2n = s2n.divide(new BigDecimal(2 * n2 * n2), RoundingMode.HALF_UP);
-            s05n = s05n.divide(new BigDecimal(2 * n2 * n2), RoundingMode.HALF_UP);
+            sn = sn.divide(BigDecimal.valueOf(2L * n2 * n2), RoundingMode.HALF_UP);
+            s2n = s2n.divide(BigDecimal.valueOf(2L * n2 * n2), RoundingMode.HALF_UP);
+            s05n = s05n.divide(BigDecimal.valueOf(2L * n2 * n2), RoundingMode.HALF_UP);
             myWriter.write(",{\"fitness\":" + n2 + ",\"runtime\":" + sn + "}\n");
             myWriter.write(",{\"fitness\":" + n2 + ",\"runtime\":" + s2n + "}\n");
             myWriter.write(",{\"fitness\":" + n2 + ",\"runtime\":" + s05n + "}\n");
@@ -177,7 +177,7 @@ public class ExpectedOneMaxHe extends ApplicationFrame {
         for (int j = 1; j <=1000; j++) {
             double sn = 0.;
             for (int i = start; i <= n; i++) {
-                sn += 1. / calcP(i, n, 1. / (c * n)).doubleValue();
+                sn += 1. / calcP(i, n, BigDecimal.valueOf(1. / (c * n))).doubleValue();
             }
             sn /= 2.;
             sn /= n;
