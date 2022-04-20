@@ -84,10 +84,23 @@ public class ExpectedLeadingOnes extends ApplicationFrame {
         for (int N = 15; N <= 30; ++N) {
             double sn = 0., s2n = 0., s05n = 0.;
             final int n1 = (int) Math.ceil(Math.pow(2, N - 0.7)), n2 = (int) Math.ceil(Math.pow(2, N - 0.3)), n = 1 << N;
+            double p = 1. / n1, p2 = 1. / (2 * n1), p05 = 2. / n1;
             for (int i = 1; i <= n1; i++) {
-                sn += 1. / (1. - Math.pow((1. / n1 * Math.pow((1. - 1. / n1), n1 - i) - 1.), 4));
-                s2n += 1. / (1. - Math.pow((1. / (2. * n1) * Math.pow((1. - 1. / (2. * n1)), n1 - i) - 1.), 4));
-                s05n += 1. / (1. - Math.pow((2. / n1 * Math.pow((1. - 2. / n1), n1 - i) - 1.), 4));
+                if (p >= 0.5) {
+                    sn += 1. / (Math.pow((1. - p), n1 - i) * p * (2. - Math.pow((1. - p), n1 - i) * p));
+                } else {
+                    sn += 1. / (Math.pow((1. - p), n1 - i) * p + Math.pow(p, n1 - i + 1) - Math.pow((1. - p), n1 - i) * Math.pow(p, n1 - i + 2));
+                }
+                if (p2 >= 0.5) {
+                    s2n += 1. / (Math.pow((1. - p2), n1 - i) * p2 * (2. - Math.pow((1. - p2), n1 - i) * p2));
+                } else {
+                    s2n += 1. / (Math.pow((1. - p2), n1 - i) * p2 + Math.pow(p2, n1 - i + 1) - Math.pow((1. - p2), n1 - i) * Math.pow(p2, n1 - i + 2));
+                }
+                if (p05 >= 0.5) {
+                    s05n += 1. / (Math.pow((1. - p05), n1 - i) * p05 * (2. - Math.pow((1. - p05), n1 - i) * p05));
+                } else {
+                    s05n += 1. / (Math.pow((1. - p05), n1 - i) * p05 + Math.pow(p05, n1 - i + 1) - Math.pow((1. - p05), n1 - i) * Math.pow(p05, n1 - i + 2));
+                }
             }
             sn /= 2.;
             s2n /= 2.;
@@ -104,7 +117,7 @@ public class ExpectedLeadingOnes extends ApplicationFrame {
             tn.add(n1, sn);
             t2n.add(n1, s2n);
             t05n.add(n1, s05n);
-
+//TODO поменять формулы ниже
             sn = 0.;
             s2n = 0.;
             s05n = 0.;
@@ -173,7 +186,12 @@ public class ExpectedLeadingOnes extends ApplicationFrame {
         for (int j = 1; j <=1000; j++) {
             double sn = 0.;
             for (int i = 1; i <= n; i++) {
-                sn += 1. / (1. - Math.pow((1. / (c * n) * Math.pow((1. - 1. / (c * n)), n - i) - 1.), 4));
+                double p = 1. / (c * n);
+                if (p >= 0.5) {
+                    sn += 1. / (Math.pow((1. - p), n - i) * p * (2. - Math.pow((1. - p), n - i) * p));
+                } else {
+                    sn += 1. / (Math.pow((1. - p), n - i) * p + Math.pow(p, n - i + 1) - Math.pow((1. - p), n - i) * Math.pow(p, n - i + 2));
+                }
             }
             sn /= 2.;
             sn /= n;
