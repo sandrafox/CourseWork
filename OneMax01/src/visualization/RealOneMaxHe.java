@@ -8,7 +8,9 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -20,12 +22,12 @@ public class RealOneMaxHe {
         myWriter = new FileWriter(title);
     }
 
-    public void createDataset() throws IOException {
+    public void createDataset() throws IOException, GAException {
         GeneticAlgorithm ga;
 
         myWriter.write("[{}\n");
         final int nRuns = 100;
-        for (int N = 5; N <= 11; ++N) {
+        for (int N = 5; N <= 10; ++N) {
             final int n1 = (int) Math.ceil(Math.pow(2, N - 0.7)), n2 = (int) Math.ceil(Math.pow(2, N - 0.3)), n = 1 << N;
             myWriter.write(",{\"fitness\":" + (2*n1));
             addGenerationsToDataSet(() -> new GADiploidWithTable(2, n1, -1, 0.5, TypeSelectionParents.SUS, TypeSelectionSurvival.FITNESS, 
@@ -61,40 +63,51 @@ public class RealOneMaxHe {
         myWriter.close();
     }
 
+    private int[] generateVector(int length, double probabilityHe) {
+        double probability0 = probabilityHe + (1 - probabilityHe) / 2;
+        int[] vector = new int[length];
+        for (int i = 0; i < length; ++i) {
+            double p = Math.random();
+            if (p <= probabilityHe) {
+                vector[i] = 1;
+            } else if (p <= probability0) {
+                vector[i] = 0;
+            } else {
+                vector[i] = 2;
+            }
+        }
+        return vector;
+    }
+
     private static void addGenerationsToDataSet(Supplier<GeneticAlgorithm> gaSup, int nRuns, int maxValue, String algName) throws GAException, IOException {
-        double sumGenerations = 0;
-        List<String> starts = new ArrayList<>();
-        Map<Int, Int> runs = new HashMap<>();
+        Duration sumGenerations = Duration.ZERO;
+        List<Duration> runs = new ArrayList<>();
         for (int i = 0; i < nRuns; ++i) {
             GeneticAlgorithm ga = gaSup.get();
             ga.evalPopulation();
-            int generations = 1;
-            int fitness = 0;
-            runAndFitness.add(raf);
-            starts.add(ga.getIndividualWithMaximalFitness().toString());
-            while ((!ga.isTerminated(maxValue))) {
+            Instant start = Instant.now();
+            int geners =0;
+            while ((geners <= 2*maxValue * maxValue) && (!ga.isTerminated(maxValue))) {
                 ga.newGeneration();
-                generations++;
+                geners++;
             }
-            if (ga instanceof GADiploidCycleWithAverage) generations *= 2;
-            if (runs.contains(generations)) {
-                runs.put(generations, runs.get(generations) + 1);
-            } else {
-                runs.put(generations, 1);
-            }
-            sumGenerations += generations;
+            var generations = Duration.between(start, Instant.now());
+            runs.add(generations);
+            sumGenerations = sumGenerations.plus(generations);
         }
-        double meanRun = sumGenerations / nRuns;
+        double meanRun = ((double)sumGenerations.toMillis()) / nRuns;
         double dis = 0;
-        for (Int gens : runs.keySet()) {
-            dis += (gens - meanRun) * (gens - meanRun) * runs.get(gens) / nRuns;
+        for (Duration generation : runs) {
+            double gens = (double) generation.toMillis();
+            dis += (gens - meanRun) * (gens - meanRun) / nRuns;
         }
-        myWriter.write(",\"runtime_mean" + algName + "\":" + meanRun + ",\"runtime_disp" + algName + "\":" + dis + "}\n");
+        dis = Math.sqrt(dis);
+        myWriter.write(",\"runtime_mean" + algName + "\":" + meanRun + ",\"runtime_disp" + algName + "\":" + dis);
         System.out.println(maxValue);
     }
 
-    public static void main(String[] args) throws IOException {
-        RealOneMaxHe chart = new RealOneMaxHe("Time for OneMaxHe");
+    public static void main(String[] args) throws IOException, GAException {
+        RealOneMaxHe chart = new RealOneMaxHe("Time for OneMaxHomo.out");
         chart.createDataset();
     }
 }
